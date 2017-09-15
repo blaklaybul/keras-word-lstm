@@ -23,8 +23,8 @@ def prepare_data(path):
     # text = re.sub('\s{2,}', ' ', text)
     toks = text.split()
 
-    max_len = 30
-    step = 1
+    max_len = 25
+    step = 2
 
     sentences = []
     next_toks = []
@@ -54,9 +54,9 @@ def prepare_data(path):
         y[i, tok_indices[next_toks[i]]] = 1
 
     model = keras.models.Sequential()
-    model.add(layers.LSTM(256, return_sequences=True, input_shape=(max_len, len(tokens))))
+    model.add(layers.LSTM(128, return_sequences=True, input_shape=(max_len, len(tokens))))
     model.add(layers.Dropout(0.2))
-    model.add(layers.LSTM(256, return_sequences=False))
+    model.add(layers.LSTM(128, return_sequences=False))
     model.add(layers.Dropout(0.2))
     model.add(layers.Dense(len(tokens), activation='softmax'))
 
@@ -70,7 +70,7 @@ def prepare_data(path):
 
 
         for temperature in [0.2, 0.5, 1.0, 1.2]:
-            generated_text  = ["The", "man", "did", "not"]
+            generated_text  = ["The", "king", "was", "as", "scared", "as"]
             print('--temp:', temperature)
             sys.stdout.write(" ".join(generated_text))
 
@@ -87,7 +87,7 @@ def prepare_data(path):
                 generated_text.append(next_token)
                 generated_text = generated_text[1:]
 
-                sys.stdout.write(" " + next_token + " ")
+                sys.stdout.write(" " + next_token)
                 sys.stdout.flush()
             print()
 
