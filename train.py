@@ -24,7 +24,7 @@ def prepare_data(path):
     toks = text.split()
 
     max_len = 30
-    step = 3
+    step = 1
 
     sentences = []
     next_toks = []
@@ -66,7 +66,7 @@ def prepare_data(path):
     for epoch in range(1,50):
         print('epoch', epoch)
 
-        model.fit(x, y, batch_size= 180, epochs=2)
+        model.fit(x, y, batch_size= 60, epochs=1)
 
 
         for temperature in [0.2, 0.5, 1.0, 1.2]:
