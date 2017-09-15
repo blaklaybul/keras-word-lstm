@@ -23,8 +23,8 @@ def prepare_data(path):
     # text = re.sub('\s{2,}', ' ', text)
     toks = text.split()
 
-    max_len = 100
-    step = 5
+    max_len = 30
+    step = 3
 
     sentences = []
     next_toks = []
@@ -54,7 +54,10 @@ def prepare_data(path):
         y[i, tok_indices[next_toks[i]]] = 1
 
     model = keras.models.Sequential()
-    model.add(layers.LSTM(256, input_shape=(max_len, len(tokens))))
+    model.add(layers.LSTM(256, return_sequences=True, input_shape=(max_len, len(tokens))))
+    model.add(layers.Dropout(0.2))
+    model.add(layers.LSTM(256, return_sequences=False))
+    model.add(layers.Dropout(0.2))
     model.add(layers.Dense(len(tokens), activation='softmax'))
 
     optimizer = keras.optimizers.RMSprop(lr=0.01)
@@ -63,7 +66,7 @@ def prepare_data(path):
     for epoch in range(1,50):
         print('epoch', epoch)
 
-        model.fit(x, y, batch_size= 100, epochs=1)
+        model.fit(x, y, batch_size= 180, epochs=2)
 
 
         for temperature in [0.2, 0.5, 1.0, 1.2]:
