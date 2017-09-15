@@ -19,11 +19,11 @@ def sample(preds, temperature=1.0):
 def prepare_data(path):
     text = open(path).read()
     print("Corpus length ", len(text))
-    text = re.sub('([-.,!()])', r' \1 ', text)
-    text = re.sub('\s{2,}', ' ', text)
+    # text = re.sub('([-.,!()])', r' \1 ', text)
+    # text = re.sub('\s{2,}', ' ', text)
     toks = text.split()
 
-    max_len = 25
+    max_len = 100
     step = 5
 
     sentences = []
