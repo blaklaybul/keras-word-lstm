@@ -1,52 +1,98 @@
 import numpy as np
-import argparse
 import os
+import sys
+# import model
+import keras
+from keras import layers
+import re
+import random
+import sys
 
-from model import Model
+def sample(preds, temperature=1.0):
+    preds = np.asarray(preds).astype('float64')
+    preds = np.log(preds) / temperature
+    exp_preds = np.exp(preds)
+    preds = exp_preds / np.sum(exp_preds)
+    probas = np.random.multinomial(1, preds, 1)
+    return np.argmax(probas)
 
-def load_data(data_dir):
+def prepare_data(path):
+    text = open(path).read()
+    print("Corpus length ", len(text))
+    text = re.sub('([-.,!()])', r' \1 ', text)
+    text = re.sub('\s{2,}', ' ', text)
+    toks = text.split()
 
-    input_file = os.path.join(data_dir, "input.txt")
-    vocab_fil = os.path.join(data_dir, "vocab.pkl")
+    max_len = 25
+    step = 5
 
-def train(args):
-    data = load_data(args.data_dir)
-    model = Model(args)
+    sentences = []
+    next_toks = []
+
+    for i in range(0, len(toks)-max_len, step):
+        sentences.append(" ".join(toks[i : i + max_len]))
+        next_toks.append(toks[i+max_len])
+    print("Number of Sequences:", len(sentences))
+
+    print(sentences[0:10])
+    print(next_toks[0:10])
+
+    # list unique tokens in the corpus
+    tokens = sorted(list(set(toks)))
+    print("Unique tokens:", len(tokens))
+    # dictionary mapping unique tokens to indices in tokens
+    tok_indices = dict((token, tokens.index(token)) for token in tokens)
+
+    # now encode the tokens into binary arrays
+    print("One Hot........")
+    x = np.zeros((len(sentences), max_len, len(tokens)), dtype=np.bool)
+    y = np.zeros((len(sentences), len(tokens)), dtype=np.bool)
+
+    for i, sentence in enumerate(sentences):
+        for t, token in enumerate(sentence.split()):
+            x[i, t, tok_indices[token]] = 1
+        y[i, tok_indices[next_toks[i]]] = 1
+
+    model = keras.models.Sequential()
+    model.add(layers.LSTM(256, input_shape=(max_len, len(tokens))))
+    model.add(layers.Dense(len(tokens), activation='softmax'))
+
+    optimizer = keras.optimizers.RMSprop(lr=0.01)
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+
+    for epoch in range(1,50):
+        print('epoch', epoch)
+
+        model.fit(x, y, batch_size= 100, epochs=1)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default="data",
-                        help="data directory containing input.txt")
-    parser.add_argument("--input_encoding", type=str, default=None,
-                        help="character encoding of input.txt")
-    parser.add_argument("--save_dir", type=str, default="save",
-                        help="directory to store checkpointed models.")
-    parser.add_argument("--rnn_size", type=int, default=256,
-                        help="size of RNN hidden state")
-    parser.add_argument("--num_layers", type=int, default=2,
-                        help="number of layers in the RNN")
-    parser.add_argument("--model", type=str, default='lstm',
-                        help="rnn, gru, or lstm")
-    parser.add_argument("--seq_length", type=int, default=25,
-                        help="rnn sequence length")
-    parser.add_argument("--batch_size", type=int, default=50,
-                        help="minibatch size")
-    parser.add_argument("--save_every", type=int, default=1000,
-                        help="save frequency")
-    parser.add_argument("--grad_clip", type=float, default=5.,
-                        help="clip gradients at this value")
-    parser.add_argument("--learning_rate", type=float, default=0.002,
-                        help="learning rate")
-    parser.add_argument("--decay_rate", type=float, default=0.97,
-                        help="decay rate for rmsprop")
-    parser.add_argument("--gpu_mem", type=float, default=0.6667,
-                        help="%% of gpu memory to be allocated, default is 66.67%%")
-    parser.add_argument("--init_from", type=str, default=None,
-                        help="location of saved model as h5 file")
+        for temperature in [0.2, 0.5, 1.0, 1.2]:
+            generated_text  = ["The", "man", "did", "not"]
+            print('--temp:', temperature)
+            sys.stdout.write(" ".join(generated_text))
 
-    args = parser.parse_args()
-    train(args)
+            # we generate 10 tokens
+            for i in range(5):
+                sampled = np.zeros((1, max_len, len(tokens)))
+                for t, token in enumerate(generated_text):
+                    sampled[0, t, tok_indices[token]] = 1
 
-if __name__ == '__main__':
-    main()
+                preds = model.predict(sampled, verbose=0)[0]
+                next_index = sample(preds, temperature)
+                next_token = tokens[next_index]
+
+                generated_text.append(next_token)
+                generated_text = generated_text[1:]
+
+                sys.stdout.write(" " + next_token + " ")
+                sys.stdout.flush()
+            print()
+
+
+def train(data_dir):
+    path = os.path.join(data_dir, 'input.txt')
+    prepare_data(path)
+
+if __name__ == "__main__":
+    data_dir = sys.argv[1]
+    train(data_dir)
