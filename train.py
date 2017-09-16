@@ -81,7 +81,7 @@ def prepare_data(path):
 
             # we generate 10 tokens
             for i in range(5):
-                sampled = np.zeros((1, max_len, len(tokens)))
+                sampled = np.zeros((1, prime, len(tokens)))
                 for t, token in enumerate(generated_text):
                     sampled[0, t, tok_indices.get(token,0)] = 1
 
