@@ -19,12 +19,12 @@ def sample(preds, temperature=1.0):
 def prepare_data(path):
     text = open(path).read()
     print("Corpus length ", len(text))
-    # text = re.sub('([-.,!()])', r' \1 ', text)
-    # text = re.sub('\s{2,}', ' ', text)
+    text = re.sub('([-.,!()])', r' \1 ', text)
+    text = re.sub('\s{2,}', ' ', text)
     toks = text.split()
 
     max_len = 25
-    step = 2
+    step = 5
 
     sentences = []
     next_toks = []
@@ -54,23 +54,23 @@ def prepare_data(path):
         y[i, tok_indices[next_toks[i]]] = 1
 
     model = keras.models.Sequential()
-    model.add(layers.LSTM(128, return_sequences=True, input_shape=(max_len, len(tokens))))
-    model.add(layers.Dropout(0.2))
-    model.add(layers.LSTM(128, return_sequences=False))
+    model.add(layers.LSTM(128, return_sequences=False, input_shape=(max_len, len(tokens))))
+    # model.add(layers.Dropout(0.2))
+    # model.add(layers.LSTM(128, return_sequences=False))
     model.add(layers.Dropout(0.2))
     model.add(layers.Dense(len(tokens), activation='softmax'))
 
-    optimizer = keras.optimizers.RMSprop(lr=0.01)
+    optimizer = keras.optimizers.RMSprop(lr=0.02)
     model.compile(loss='categorical_crossentropy', optimizer=optimizer)
 
     for epoch in range(1,50):
         print('epoch', epoch)
 
-        model.fit(x, y, batch_size= 60, epochs=1)
+        model.fit(x, y, batch_size= 50, epochs=1)
 
 
         for temperature in [0.2, 0.5, 1.0, 1.2]:
-            generated_text  = ["He", "was", "as", "scared", "as"]
+            generated_text  = ["The", "woman", "looked", "like"]
             print('--temp:', temperature)
             sys.stdout.write(" ".join(generated_text))
 
