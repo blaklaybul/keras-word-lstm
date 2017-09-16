@@ -70,7 +70,7 @@ def prepare_data(path):
 
 
         for temperature in [0.2, 0.5, 1.0, 1.2]:
-            generated_text  = ["The", "king", "was", "as", "scared", "as"]
+            generated_text  = ["He", "was", "as", "scared", "as"]
             print('--temp:', temperature)
             sys.stdout.write(" ".join(generated_text))
 
