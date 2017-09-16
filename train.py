@@ -70,10 +70,11 @@ def prepare_data(path):
         model.fit(x, y, batch_size= 50, epochs=1)
 
         start_index = random.randint(0, len(toks) - max_len - 1)
-        generated_text = toks[start_index: start_index + max_len]
+
 
         for temperature in [0.2, 0.5, 1.0, 1.2]:
             # generated_text  = ["The", "woman", "looked", "like"]
+            generated_text = toks[start_index: start_index + max_len]
             print('--temp:', temperature)
             sys.stdout.write(" ".join(generated_text))
 
