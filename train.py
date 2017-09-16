@@ -25,7 +25,7 @@ def prepare_data(path):
     toks = text.split()
 
     max_len = 25
-    step = 5
+    step = 1
 
     sentences = []
     next_toks = []
@@ -61,7 +61,7 @@ def prepare_data(path):
     model.add(layers.Dropout(0.2))
     model.add(layers.Dense(len(tokens), activation='softmax'))
 
-    optimizer = keras.optimizers.RMSprop(lr=0.02)
+    optimizer = keras.optimizers.RMSprop(lr=0.01)
     model.compile(loss='categorical_crossentropy', optimizer=optimizer)
 
     for epoch in range(1,50):
@@ -74,12 +74,13 @@ def prepare_data(path):
 
         for temperature in [0.2, 0.5, 1.0, 1.2]:
             # generated_text  = ["The", "woman", "looked", "like"]
-            generated_text = toks[start_index: start_index + max_len]
+            prime = 5
+            generated_text = toks[start_index: start_index + prime]
             print('--temp:', temperature)
             sys.stdout.write(" ".join(generated_text))
 
             # we generate 10 tokens
-            for i in range(25):
+            for i in range(5):
                 sampled = np.zeros((1, max_len, len(tokens)))
                 for t, token in enumerate(generated_text):
                     sampled[0, t, tok_indices.get(token,0)] = 1
