@@ -18,6 +18,7 @@ def sample(preds, temperature=1.0):
 
 def prepare_data(path):
     text = open(path).read()
+    text = open(path).read().lower()
     print("Corpus length ", len(text))
     text = re.sub('([-.,!()])', r' \1 ', text)
     text = re.sub('\s{2,}', ' ', text)
@@ -54,9 +55,9 @@ def prepare_data(path):
         y[i, tok_indices[next_toks[i]]] = 1
 
     model = keras.models.Sequential()
-    model.add(layers.LSTM(128, return_sequences=False, input_shape=(max_len, len(tokens))))
-    # model.add(layers.Dropout(0.2))
-    # model.add(layers.LSTM(128, return_sequences=False))
+    model.add(layers.LSTM(256, return_sequences=True, input_shape=(max_len, len(tokens))))
+    model.add(layers.Dropout(0.2))
+    model.add(layers.LSTM(256, return_sequences=False))
     model.add(layers.Dropout(0.2))
     model.add(layers.Dense(len(tokens), activation='softmax'))
 
@@ -68,14 +69,16 @@ def prepare_data(path):
 
         model.fit(x, y, batch_size= 50, epochs=1)
 
+        start_index = random.randint(0, len(text) - max_len - 1)
+        generated_text = toks[start_index: start_index + max_len]
 
         for temperature in [0.2, 0.5, 1.0, 1.2]:
-            generated_text  = ["The", "woman", "looked", "like"]
+            # generated_text  = ["The", "woman", "looked", "like"]
             print('--temp:', temperature)
             sys.stdout.write(" ".join(generated_text))
 
             # we generate 10 tokens
-            for i in range(5):
+            for i in range(25):
                 sampled = np.zeros((1, max_len, len(tokens)))
                 for t, token in enumerate(generated_text):
                     sampled[0, t, tok_indices.get(token,0)] = 1
