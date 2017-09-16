@@ -78,7 +78,7 @@ def prepare_data(path):
             for i in range(5):
                 sampled = np.zeros((1, max_len, len(tokens)))
                 for t, token in enumerate(generated_text):
-                    sampled[0, t, tok_indices[token]] = 1
+                    sampled[0, t, tok_indices.get(token,0)] = 1
 
                 preds = model.predict(sampled, verbose=0)[0]
                 next_index = sample(preds, temperature)
