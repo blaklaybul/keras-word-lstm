@@ -25,7 +25,7 @@ def prepare_data(path):
     toks = text.split()
 
     max_len = 25
-    step = 1
+    step = 5
 
     sentences = []
     next_toks = []
