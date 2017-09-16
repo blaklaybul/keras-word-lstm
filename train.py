@@ -17,11 +17,11 @@ def sample(preds, temperature=1.0):
     return np.argmax(probas)
 
 def prepare_data(path):
-    text = open(path).read()
+    # text = open(path).read()
     text = open(path).read().lower()
     print("Corpus length ", len(text))
-    text = re.sub('([-.,!()])', r' \1 ', text)
-    text = re.sub('\s{2,}', ' ', text)
+    # text = re.sub('([-.,!()])', r' \1 ', text)
+    # text = re.sub('\s{2,}', ' ', text)
     toks = text.split()
 
     max_len = 25
